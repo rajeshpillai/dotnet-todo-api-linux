@@ -3,7 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TodoApi.Data;
+using TodoApi.Infrastructure.Persistence;
 
 #nullable disable
 
@@ -17,7 +17,7 @@ namespace TodoApi.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
 
-            modelBuilder.Entity("TodoApi.Models.Tag", b =>
+            modelBuilder.Entity("TodoApi.Domain.Entities.Tag", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -32,7 +32,7 @@ namespace TodoApi.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("TodoApi.Models.TodoItem", b =>
+            modelBuilder.Entity("TodoApi.Domain.Entities.TodoItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -53,7 +53,7 @@ namespace TodoApi.Migrations
                     b.ToTable("Todos");
                 });
 
-            modelBuilder.Entity("TodoApi.Models.TodoTag", b =>
+            modelBuilder.Entity("TodoApi.Domain.Entities.TodoTag", b =>
                 {
                     b.Property<int>("TodoItemId")
                         .HasColumnType("INTEGER");
@@ -68,15 +68,15 @@ namespace TodoApi.Migrations
                     b.ToTable("TodoTags");
                 });
 
-            modelBuilder.Entity("TodoApi.Models.TodoTag", b =>
+            modelBuilder.Entity("TodoApi.Domain.Entities.TodoTag", b =>
                 {
-                    b.HasOne("TodoApi.Models.Tag", "Tag")
+                    b.HasOne("TodoApi.Domain.Entities.Tag", "Tag")
                         .WithMany("TodoTags")
                         .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TodoApi.Models.TodoItem", "TodoItem")
+                    b.HasOne("TodoApi.Domain.Entities.TodoItem", "TodoItem")
                         .WithMany("TodoTags")
                         .HasForeignKey("TodoItemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -87,12 +87,12 @@ namespace TodoApi.Migrations
                     b.Navigation("TodoItem");
                 });
 
-            modelBuilder.Entity("TodoApi.Models.Tag", b =>
+            modelBuilder.Entity("TodoApi.Domain.Entities.Tag", b =>
                 {
                     b.Navigation("TodoTags");
                 });
 
-            modelBuilder.Entity("TodoApi.Models.TodoItem", b =>
+            modelBuilder.Entity("TodoApi.Domain.Entities.TodoItem", b =>
                 {
                     b.Navigation("TodoTags");
                 });

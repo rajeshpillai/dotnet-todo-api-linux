@@ -1,11 +1,17 @@
 using Microsoft.EntityFrameworkCore;
-using TodoApi.Data;
+using TodoApi.Infrastructure;
+using TodoApi.Infrastructure.Persistence;
+using TodoApi.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add database service
 builder.Services.AddDbContext<TodoContext>(options =>
     options.UseSqlite("Data Source=todo.db"));
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ITodoRepository, TodoRepository>();
+builder.Services.AddScoped<ITagRepository, TagRepository>(); // Register TagRepository
 
 // Add controllers -> handle circular reference
 builder.Services.AddControllers()

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TodoApi.Models
+namespace TodoApi.Domain.Entities
 {
     public class TodoItem
     {
@@ -18,5 +18,13 @@ namespace TodoApi.Models
 
         // Many-to-many relationship
         public ICollection<TodoTag> TodoTags { get; set; } = new List<TodoTag>();
+
+        public void AssignTags(List<int> tagIds)
+        {
+            foreach (var tagId in tagIds)
+            {
+                TodoTags.Add(new TodoTag { TagId = tagId });
+            }
+        }
     }
 }

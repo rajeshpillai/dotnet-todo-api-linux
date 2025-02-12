@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using TodoApi.Models;
+using TodoApi.Domain.Entities;
 
-namespace TodoApi.Data
+namespace TodoApi.Infrastructure.Persistence
 {
     public class TodoContext : DbContext
     {
-        public TodoContext(DbContextOptions<TodoContext> options) : base(options) {}
+        public TodoContext(DbContextOptions<TodoContext> options) : base(options) { }
 
         public DbSet<TodoItem> Todos { get; set; }
         public DbSet<Tag> Tags { get; set; }
@@ -14,7 +14,7 @@ namespace TodoApi.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TodoTag>()
-                .HasKey(tt => new { tt.TodoItemId, tt.TagId }); // Composite primary key
+                .HasKey(tt => new { tt.TodoItemId, tt.TagId });
 
             modelBuilder.Entity<TodoTag>()
                 .HasOne(tt => tt.TodoItem)
