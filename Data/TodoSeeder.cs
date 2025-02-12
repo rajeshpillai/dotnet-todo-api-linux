@@ -12,19 +12,34 @@ namespace TodoApi.Data
         {
             using (var context = new TodoContext(serviceProvider.GetRequiredService<DbContextOptions<TodoContext>>()))
             {
-                // Ensure the database is created
-                context.Database.Migrate();
+                if (context.Database.GetPendingMigrations().Any())
+                {
+                    context.Database.Migrate();
+                }
 
-                // Check if data already exists
+                if (!context.Tags.Any())
+                {
+                    context.Tags.AddRange(
+                        new Tag { Name = "Work" },
+                        new Tag { Name = "Personal" },
+                        new Tag { Name = "Urgent" },
+                        new Tag { Name = "Low Priority" }
+                    );
+                    context.SaveChanges();
+                }
+
                 if (!context.Todos.Any())
                 {
-                    context.Todos.AddRange(
-                        new TodoItem { Title = "Buy groceries", IsCompleted = false },
-                        new TodoItem { Title = "Walk the dog", IsCompleted = false },
-                        new TodoItem { Title = "Finish C# project", IsCompleted = true },
-                        new TodoItem { Title = "Read a book", IsCompleted = false }
-                    );
+                    var workTag = context.Tags.FirstOrDefault(t => t.Name == "Work");
+                    var personalTag = context.Tags.FirstOrDefault(t => t.Name == "Personal");
+                    var urgentTag = context.Tags.FirstOrDefault(t => t.Name == "Urgent");
 
+                    context.Todos.AddRange(
+                        new TodoItem { Title = "Finish project", IsCompleted = false, TodoTags = new List<TodoTag> { new TodoTag { Tag = workTag } } },
+                        new TodoItem { Title = "Buy groceries", IsCompleted = false, TodoTags = new List<TodoTag> { new TodoTag { Tag = personalTag } } },
+                        new TodoItem { Title = "Reply to emails", IsCompleted = false, TodoTags = new List<TodoTag> { new TodoTag { Tag = workTag }, new TodoTag { Tag = urgentTag } } },
+                        new TodoItem { Title = "Schedule doctor appointment", IsCompleted = false, TodoTags = new List<TodoTag> { new TodoTag { Tag = personalTag } } }
+                    );
                     context.SaveChanges();
                 }
             }

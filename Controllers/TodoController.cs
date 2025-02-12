@@ -17,29 +17,50 @@ namespace TodoApi.Controllers
         }
 
         // GET: api/todos
-        [HttpGet]
+       [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodos()
         {
-            return await _context.Todos.ToListAsync();
+            var todos = await _context.Todos
+                .Include(t => t.TodoTags)       // Load the relationship table
+                .ThenInclude(tt => tt.Tag)       // Load the actual Tag data
+                .ToListAsync();
+
+            return todos;
         }
+
 
         // GET: api/todos/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<TodoItem>> GetTodoById(int id)
         {
-            var todo = await _context.Todos.FindAsync(id);
+            var todo = await _context.Todos
+                .Include(t => t.TodoTags)
+                .ThenInclude(tt => tt.Tag)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
             if (todo == null) return NotFound();
             return todo;
         }
 
+
         // POST: api/todos
         [HttpPost]
-        public async Task<ActionResult<TodoItem>> CreateTodo(TodoItem todo)
+        public async Task<ActionResult<TodoItem>> CreateTodo([FromBody]TodoItem todo, [FromQuery]List<int> tagIds)
         {
+            foreach (var tagId in tagIds)
+            {
+                var tag = await _context.Tags.FindAsync(tagId);
+                if (tag != null)
+                {
+                    todo.TodoTags.Add(new TodoTag { TagId = tagId });
+                }
+            }
+
             _context.Todos.Add(todo);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetTodoById), new { id = todo.Id }, todo);
         }
+
 
         // PUT: api/todos/{id}
         [HttpPut("{id}")]
@@ -52,6 +73,28 @@ namespace TodoApi.Controllers
 
             return NoContent();
         }
+
+        [HttpPost("{id}/tags")]
+        public async Task<IActionResult> AssignTags(int id, List<int> tagIds)
+        {
+            var todo = await _context.Todos
+                .Include(t => t.TodoTags)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (todo == null) return NotFound();
+
+            foreach (var tagId in tagIds)
+            {
+                if (!todo.TodoTags.Any(tt => tt.TagId == tagId))
+                {
+                    todo.TodoTags.Add(new TodoTag { TodoItemId = id, TagId = tagId });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
 
         // DELETE: api/todos/{id}
         [HttpDelete("{id}")]

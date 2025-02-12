@@ -7,8 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TodoContext>(options =>
     options.UseSqlite("Data Source=todo.db"));
 
-// Add controllers
-builder.Services.AddControllers();
+// Add controllers -> handle circular reference
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
+
 
 var app = builder.Build();
 

@@ -64,7 +64,8 @@ GET /api/todos/{id}
 ```POST /api/todos
 Content-Type: application/json
 {
-  "title": "New Task"
+  "title": "New Task",
+  "tagIds": [1, 2]
 }
 ```
 
@@ -90,6 +91,16 @@ DELETE /api/todos/{id}
 ```
 PATCH /api/todos/{id}/toggle
 ```
+
+## Assign tags to Todo
+```
+POST /api/todos/{id}/tags
+Content-Type: application/json
+[
+  1, 2, 3
+]
+```
+
 
 6. Docker Setup (Optional)
 
