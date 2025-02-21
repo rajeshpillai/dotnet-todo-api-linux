@@ -5,6 +5,15 @@ using TodoApi.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ✅ Allow ALL Origins, Methods, and Headers (for dev/testing)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+});
+
 // Add database service
 builder.Services.AddDbContext<TodoContext>(options =>
     options.UseSqlite("Data Source=todo.db"));
@@ -22,7 +31,32 @@ builder.Services.AddControllers()
     });
 
 
+// ✅ Force Kestrel to use port 5555
+builder.WebHost.UseKestrel()
+    .ConfigureKestrel((context, options) =>
+    {
+        options.ListenAnyIP(5555); // ✅ Runs on port 5555
+    });
+
 var app = builder.Build();
+
+
+// ✅ Enable CORS Middleware for All Requests
+app.UseCors("AllowAll");
+
+// ✅ Manually handle OPTIONS requests before controllers
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+        context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        context.Response.StatusCode = 204; // ✅ No Content
+        return;
+    }
+    await next();
+});
 
 // Apply database migrations automatically
 using (var scope = app.Services.CreateScope())
